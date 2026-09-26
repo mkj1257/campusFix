@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusFix - Campus Issue Reporting & Tracking Dashboard</title>
+
+    <!-- Design System Fonts: Manrope (Headline) + Hanken Grotesk (Body/Label) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Hanken+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        headline: ['Manrope', 'sans-serif'],
+                        body: ['Hanken Grotesk', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50:  '#e6eef5',
+                            100: '#cddde9',
+                            200: '#9abbda',
+                            300: '#6899c4',
+                            400: '#3577ae',
+                            500: '#0F4C81',
+                            600: '#0d4374',
+                            700: '#0a3560',
+                            800: '#08274a',
+                            900: '#051a34',
+                        },
+                        secondary: {
+                            50:  '#f1f4f7',
+                            100: '#e2e8ef',
+                            200: '#c6d1df',
+                            300: '#a9bbcf',
+                            400: '#8da4bf',
+                            500: '#64748B',
+                            600: '#5a687d',
+                            700: '#4b576a',
+                            800: '#3c4656',
+                            900: '#2d3542',
+                        },
+                        tertiary: '#F8FAFC',
+                        neutral: {
+                            50:  '#e9ecef',
+                            100: '#d3d8de',
+                            200: '#a7b1bd',
+                            300: '#7b8b9d',
+                            400: '#4f647c',
+                            500: '#1E293B',
+                            600: '#1b2535',
+                            700: '#17202e',
+                            800: '#121a25',
+                            900: '#0d131c',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Global defaults */
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+        }
+        h1, h2, h3, h4, h5, h6, .font-headline {
+            font-family: 'Manrope', sans-serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #F8FAFC; }
+        ::-webkit-scrollbar-thumb { background: #c6d1df; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748B; }
+
+        /* Smooth card transitions */
+        .card-transition { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Button base for design system */
+        .btn-primary {
+            background-color: #0F4C81;
+            color: #ffffff;
+            border: 2px solid #0F4C81;
+        }
+        .btn-primary:hover { background-color: #0a3560; border-color: #0a3560; }
+
+        .btn-secondary {
+            background-color: #64748B;
+            color: #ffffff;
+            border: 2px solid #64748B;
+        }
+        .btn-secondary:hover { background-color: #4b576a; border-color: #4b576a; }
+
+        .btn-inverted {
+            background-color: #1E293B;
+            color: #ffffff;
+            border: 2px solid #1E293B;
+        }
+        .btn-inverted:hover { background-color: #0d131c; border-color: #0d131c; }
+
+        .btn-outlined {
+            background-color: transparent;
+            color: #1E293B;
+            border: 2px solid #1E293B;
+        }
+        .btn-outlined:hover { background-color: #1E293B; color: #ffffff; }
+
+        /* Input focus ring matching primary */
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.18);
+        }
+    </style>
+</head>
+<body class="bg-tertiary text-neutral-500 font-body min-h-full flex flex-col selection:bg-primary-500 selection:text-white">
+
+    <!-- ===== HEADER ===== -->
+    <header class="sticky top-0 z-40 bg-neutral-500 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+
+                <!-- Logo -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-500 flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-wrench text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="font-headline font-extrabold text-xl tracking-tight text-white">CampusFix</span>
+                        <p class="text-xs text-secondary-200 hidden sm:block font-body">Maintenance & Infrastructure Tracker</p>
+                    </div>
+                </div>
+
+                <!-- View Navigation Tabs -->
+                <div class="flex items-center space-x-1 bg-neutral-700 p-1 rounded-xl border border-neutral-400/30">
+                    <button id="view-active-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-bold font-body transition-all flex items-center space-x-1.5 bg-primary-500 text-white">
+                        <i class="fa-solid fa-fire text-xs"></i>
+                        <span>Active Issues</span>
+                        <span id="nav-active-count" class="bg-white/20 px-1.5 py-0.5 rounded-md text-[10px] font-extrabold">0</span>
+                    </button>
+                    <button id="view-resolved-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-bold font-body transition-all flex items-center space-x-1.5 text-secondary-200 hover:text-white hover:bg-neutral-400/40">
+                        <i class="fa-solid fa-circle-check text-[11px]"></i>
+                        <span>Resolved</span>
+                        <span id="nav-resolved-count" class="bg-neutral-400/40 px-1.5 py-0.5 rounded-md text-[10px] font-extrabold">0</span>
+                    </button>
+                </div>
+
+                <!-- Right Controls -->
+                <div class="flex items-center space-x-2.5">
+                    <!-- Staff badge -->
+                    <div class="hidden sm:flex items-center bg-neutral-700 px-3 py-1.5 rounded-xl border border-neutral-400/30">
+                        <div class="text-right">
+                            <span class="block text-[11px] font-semibold text-secondary-100 font-body">Staff Access</span>
+                            <span id="admin-badge" class="block text-[10px] text-secondary-300 font-medium font-body">Logged Out</span>
+                        </div>
+                    </div>
+
+                    <!-- Login button -->
+                    <button id="header-login-btn" class="btn-primary px-3.5 py-1.5 rounded-xl text-xs font-bold font-body transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-right-to-bracket text-[11px]"></i>
+                        <span id="login-btn-text">Log In</span>
+                    </button>
+
+                    <!-- Reset -->
+                    <button id="reset-data-btn" title="Reset Demo Data" class="text-secondary-300 hover:text-white bg-neutral-700 hover:bg-neutral-600 p-2 rounded-xl border border-neutral-400/30 transition-colors text-xs flex items-center space-x-1">
+                        <i class="fa-solid fa-rotate text-sm"></i>
+                        <span class="hidden sm:inline font-body">Reset</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow w-full">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- LEFT: Issue Report Form -->
+            <section class="lg:col-span-4 lg:sticky lg:top-24">
+                <div class="bg-white rounded-2xl shadow-lg shadow-primary-500/5 border border-primary-100 overflow-hidden card-transition">
+
+                    <!-- Form Header -->
+                    <div class="bg-primary-500 p-5 text-white">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-9 h-9 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center">
+                                <i class="fa-solid fa-plus text-white/90"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-headline font-bold text-lg leading-tight">Report an Issue</h2>
+                                <p class="text-xs text-primary-100 mt-0.5 font-body">Help keep our campus safe and functional</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Body -->
+                    <form id="issue-form" class="p-6 space-y-5">
+
+                        <!-- Category -->
+                        <div>
+                            <label for="issue-category" class="block text-[11px] font-bold text-secondary-500 uppercase tracking-widest mb-2 font-body">
+                                Category <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <select id="issue-category" required class="w-full pl-10 pr-8 py-2.5 bg-tertiary border border-secondary-200 rounded-xl text-sm font-medium text-neutral-500 focus:border-primary-500 transition-all appearance-none cursor-pointer font-body">
+                                    <option value="" disabled selected>Select category...</option>
+                                    <option value="Classroom/Lab">🏫 Classroom / Lab</option>
+                                    <option value="Wi-Fi/IT">📶 Wi-Fi / IT Infrastructure</option>
+                                    <option value="Sanitation">🧹 Sanitation & Restroom</option>
+                                    <option value="Electricity">⚡ Electricity & HVAC</option>
+                                    <option value="Other">🛠️ Other / General Repair</option>
+                                </select>
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary-400">
+                                    <i class="fa-solid fa-list-check text-xs"></i>
+                                </div>
+                                <div class="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-secondary-400">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div>
+                            <label for="issue-location" class="block text-[11px] font-bold text-secondary-500 uppercase tracking-widest mb-2 font-body">
+                                Building / Room <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <input type="text" id="issue-location" required placeholder="e.g. Science Block B, Room 302" class="w-full pl-10 pr-4 py-2.5 bg-tertiary border border-secondary-200 rounded-xl text-sm font-medium text-neutral-500 placeholder-secondary-300 focus:border-primary-500 transition-all font-body">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary-400">
+                                    <i class="fa-solid fa-location-dot text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="issue-description" class="block text-[11px] font-bold text-secondary-500 uppercase tracking-widest font-body">
+                                    Description <span class="text-red-500">*</span>
+                                </label>
+                                <span id="char-counter" class="text-[11px] text-secondary-400 font-medium font-body">0/200</span>
+                            </div>
+                            <textarea id="issue-description" required maxlength="200" rows="3" placeholder="Briefly describe the maintenance problem..." class="w-full p-3 bg-tertiary border border-secondary-200 rounded-xl text-sm font-medium text-neutral-500 placeholder-secondary-300 focus:border-primary-500 transition-all resize-none font-body"></textarea>
+                        </div>
+
+                        <!-- Urgency -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-secondary-500 uppercase tracking-widest mb-2 font-body">
+                                Urgency Level <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="issue-urgency" value="Low" class="sr-only peer">
+                                    <div class="p-2.5 border-2 border-secondary-200 peer-checked:border-primary-500 peer-checked:bg-primary-50 rounded-xl text-center transition-all hover:bg-tertiary">
+                                        <i class="fa-regular fa-circle-check text-primary-500 mb-1 block"></i>
+                                        <span class="block text-xs font-bold text-neutral-500 font-body">Low</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="issue-urgency" value="Medium" checked class="sr-only peer">
+                                    <div class="p-2.5 border-2 border-secondary-200 peer-checked:border-amber-500 peer-checked:bg-amber-50 rounded-xl text-center transition-all hover:bg-tertiary">
+                                        <i class="fa-solid fa-triangle-exclamation text-amber-500 mb-1 block"></i>
+                                        <span class="block text-xs font-bold text-neutral-500 font-body">Medium</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="radio" name="issue-urgency" value="High" class="sr-only peer">
+                                    <div class="p-2.5 border-2 border-secondary-200 peer-checked:border-red-500 peer-checked:bg-red-50 rounded-xl text-center transition-all hover:bg-tertiary">
+                                        <i class="fa-solid fa-circle-exclamation text-red-500 mb-1 block"></i>
+                                        <span class="block text-xs font-bold text-neutral-500 font-body">High</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn-primary w-full py-3 px-4 rounded-xl font-bold shadow-lg shadow-primary-500/20 hover:shadow-primary-500/30 active:scale-[0.99] transition-all flex items-center justify-center space-x-2 text-sm font-body">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                            <span>Submit Issue Report</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- RIGHT: Dashboard Feed -->
+            <section class="lg:col-span-8 space-y-5">
+
+                <!-- Filters Bar -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-primary-100/60 space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 id="view-title" class="font-headline font-extrabold text-xl text-neutral-500 flex items-center space-x-2">
+                                <span>Active Campus Dashboard</span>
+                                <span id="feed-count-badge" class="bg-primary-50 text-primary-500 text-xs px-2.5 py-0.5 rounded-full font-bold border border-primary-200 font-body">0</span>
+                            </h2>
+                            <p id="view-subtitle" class="text-xs text-secondary-500 mt-0.5 font-body">Showing pending and in-progress maintenance issues</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-semibold text-secondary-500 whitespace-nowrap font-body"><i class="fa-solid fa-arrow-down-short-wide mr-1"></i>Sort:</span>
+                            <select id="sort-filter" class="bg-tertiary border border-secondary-200 text-xs font-bold text-neutral-500 rounded-xl px-3 py-2 focus:border-primary-500 cursor-pointer font-body">
+                                <option value="newest" selected>⏰ Newest First</option>
+                                <option value="upvotes">🔥 Most Upvoted</option>
+                                <option value="urgency">⚠️ Highest Urgency</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-3 border-t border-secondary-100">
+                        <!-- Search -->
+                        <div class="sm:col-span-7 relative">
+                            <input type="text" id="search-input" placeholder="Search by location or keywords..." class="w-full pl-9 pr-4 py-2.5 bg-tertiary border border-secondary-200 rounded-xl text-xs font-medium text-neutral-500 placeholder-secondary-300 focus:border-primary-500 font-body">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-secondary-400">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            </div>
+                        </div>
+                        <!-- Category filter -->
+                        <div class="sm:col-span-5">
+                            <select id="category-filter" class="w-full bg-tertiary border border-secondary-200 text-xs font-semibold text-neutral-500 rounded-xl px-3 py-2.5 focus:border-primary-500 cursor-pointer font-body">
+                                <option value="ALL">All Categories</option>
+                                <option value="Classroom/Lab">Classroom / Lab</option>
+                                <option value="Wi-Fi/IT">Wi-Fi / IT</option>
+                                <option value="Sanitation">Sanitation</option>
+                                <option value="Electricity">Electricity</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Banner -->
+                <div id="admin-banner" class="hidden bg-primary-500 text-white p-3.5 rounded-2xl shadow-md flex items-center justify-between text-xs font-body">
+                    <div class="flex items-center space-x-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </span>
+                        <div>
+                            <span class="font-bold">Staff Management Mode:</span>
+                            <span id="admin-user-display" class="text-primary-100"> Logged in as Staff. You can update issue statuses on cards.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issues Feed -->
+                <div id="issues-feed" class="space-y-4"></div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden bg-white rounded-2xl p-12 text-center border border-primary-100/60 shadow-sm">
+                    <div id="empty-icon-box" class="w-16 h-16 bg-primary-50 text-primary-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+                    <h3 id="empty-title" class="font-headline font-bold text-neutral-500 text-base">No Issues Found</h3>
+                    <p id="empty-desc" class="text-xs text-secondary-500 max-w-sm mx-auto mt-1 font-body">No campus issues match your current search or filter criteria.</p>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- ===== LOGIN MODAL ===== -->
+    <div id="admin-login-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-neutral-500/70 backdrop-blur-sm hidden transition-all">
+        <div class="bg-white rounded-2xl shadow-2xl border border-primary-100 w-full max-w-md mx-4 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-primary-500 p-5 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center">
+                        <i class="fa-solid fa-user-shield text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-headline font-bold text-lg leading-tight">Staff & Admin Login</h3>
+                        <p class="text-xs text-primary-100 mt-0.5 font-body">Enter credentials to unlock management actions</p>
+                    </div>
+                </div>
+                <button id="close-modal-btn" class="text-white/60 hover:text-white text-lg p-1 transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <!-- Modal Form -->
+            <form id="admin-login-form" class="p-6 space-y-4">
+                <div>
+                    <label for="admin-id-input" class="block text-[11px] font-bold text-secondary-500 uppercase tracking-widest mb-1.5 font-body">
+                        Username / ID <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="text" id="admin-id-input" required placeholder="Enter username..." class="w-full pl-10 pr-4 py-2.5 bg-tertiary border border-secondary-200 rounded-xl text-sm font-medium text-neutral-500 placeholder-secondary-300 focus:border-primary-500 transition-all font-body">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary-400">
+                            <i class="fa-solid fa-id-badge text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <label for="admin-password-input" class="block text-[11px] font-bold text-secondary-500 uppercase tracking-widest mb-1.5 font-body">
+                        Password <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="admin-password-input" required placeholder="Enter password..." class="w-full pl-10 pr-4 py-2.5 bg-tertiary border border-secondary-200 rounded-xl text-sm font-medium text-neutral-500 placeholder-secondary-300 focus:border-primary-500 transition-all font-body">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-secondary-400">
+                            <i class="fa-solid fa-lock text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 flex items-center justify-end space-x-3">
+                    <button type="button" id="cancel-login-btn" class="btn-outlined px-4 py-2.5 rounded-xl text-xs font-bold transition-all font-body">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold shadow-md shadow-primary-500/20 transition-all flex items-center space-x-2 font-body">
+                        <i class="fa-solid fa-right-to-bracket text-xs"></i>
+                        <span>Log In</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
